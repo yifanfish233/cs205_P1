@@ -1,5 +1,27 @@
 
 import random
+
+
+class MyTreeNode:
+    def __init__(self, state, parent=None):
+        """
+        Initialize a tree node with a state
+        :param state: the puzzle state
+        :param parent: the parent node
+        """
+        self.state = state
+        self.parent = parent
+        self.children = []
+        self.visited = False
+
+    def __lt__(self, other):
+        """
+        Customized comparison functions
+        :param other: the other tree node
+        :return: which one is smaller. if current one is smaller, return True; otherwise, return False
+        """
+        return self.state < other.state
+
 class Problem:
     def __init__(self, initial_state=None):
         self.goal_state = [
@@ -28,17 +50,18 @@ class Problem:
     def goal_test(self, state):
         return state == self.goal_state
 
-    def successors(self, state):
-        successors = []
-        i, j = self.find_zero(state)
+    def get_next_states(self, node):
+        next_states = []
+        i, j = self.find_zero(node.state)
 
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             x, y = i + dx, j + dy
             if 0 <= x < 3 and 0 <= y < 3:
-                new_state = [row.copy() for row in state]
+                new_state = [row.copy() for row in node.state]
                 new_state[i][j], new_state[x][y] = new_state[x][y], new_state[i][j]
-                successors.append(new_state)
-        return successors
+                new_node = MyTreeNode(new_state, node)
+                next_states.append(new_node)
+        return next_states
 
     def find_zero(self, state):
         for i, row in enumerate(state):
@@ -46,10 +69,18 @@ class Problem:
                 if cell == 0:
                     return i, j
 
-    def print_state(self, state):
-        print("State:")
-        for row in state:
-            print(row)
+    def print_state(self, state, representation="grid"):
+        if representation == "list":
+            for row in state:
+                print(row)
+        elif representation == "grid":
+            for i in range(3):
+                for j in range(3):
+                    print(state[i][j], end=" ")
+                print()
+        else:
+            print("Invalid representation.")
+
     def misplaced_tile_heuristic(self, state):
         misplaced_tiles = sum(
             1 for i, row in enumerate(state) for j, cell in enumerate(row)
@@ -62,6 +93,7 @@ class Problem:
         for i, row in enumerate(state):
             for j, cell in enumerate(row):
                 if cell != 0:
-                    correct_i, correct_j = divmod(cell, 3)
+                    correct_i, correct_j = divmod(cell - 1, 3)
                     manhattan_distance += abs(i - correct_i) + abs(j - correct_j)
         return manhattan_distance
+
