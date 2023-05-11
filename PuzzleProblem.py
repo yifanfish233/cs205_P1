@@ -62,6 +62,7 @@ class Problem:
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             x, y = i + dx, j + dy
             if 0 <= x < 3 and 0 <= y < 3:
+                # use copy to avoid shallow copy. Otherwise, the state will be changed
                 new_state = [row.copy() for row in node.state]
                 new_state[i][j], new_state[x][y] = new_state[x][y], new_state[i][j]
                 new_node = MyTreeNode(new_state, node)
