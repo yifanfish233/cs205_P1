@@ -13,7 +13,8 @@ def general_search(problem, queueing_function, heuristic_function=None, show_inf
         max_queue_size = max(max_queue_size, len(nodes))
         if show_info:
             print("Expanding state:")
-            heuristic_value = heuristic_function(problem, node.state) if heuristic_function else None
+            # heuristic_value = heuristic_function(problem, node.state) if heuristic_function else None
+            heuristic_value = heuristic_function(problem,node.state) if heuristic_function else None
             print_state_with_info(node.state, cost, heuristic=heuristic_value)
 
         if problem.goal_test(node.state):
@@ -35,8 +36,9 @@ def search_queueing_function(nodes, next_states, visited, current_cost, problem,
     return nodes
 
 def print_state(state):
-    for i in range(3):
-        for j in range(3):
+    n = len(state)
+    for i in range(n):
+        for j in range(n):
             print(state[i][j], end=" ")
         print()
 
@@ -47,7 +49,7 @@ def print_state_with_info(state, cost, heuristic=None):
         print(f"h(n) = {heuristic}")
     print()
 
-def print_solution(solution, heuristic_function=None):
+def print_solution(solution,problem, heuristic_function=None):
     if not solution["success"]:
         print("No solution found.")
     else:
@@ -59,7 +61,7 @@ def print_solution(solution, heuristic_function=None):
             if solution["cost"] != 0:
                 state = solution["state"]
                 g_n = solution["cost"]
-                h_n = heuristic_function(state)
+                h_n = heuristic_function(problem,state)
                 print_state_with_info(state, g_n, heuristic=h_n)
         else:
             state = solution["state"]

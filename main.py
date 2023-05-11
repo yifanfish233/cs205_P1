@@ -1,22 +1,24 @@
 import time
 import general_search_alg as gs
 import PuzzleProblem as pp
+#part I use external library:
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-def test_algorithms(algorithms, initial_states):
+def test_algorithms(algorithms, initial_states, sizes):
     results = []
     for algorithm, heuristic in algorithms:
-        for depth, initial_state in enumerate(initial_states):
-            problem = pp.Problem(initial_state)
+        for size, initial_state in zip(sizes, initial_states):
+            problem = pp.Problem(size, initial_state)
             start_time = time.time()
-            solution = gs.general_search(problem, gs.search_queueing_function, heuristic_function=heuristic)
+            solution = gs.general_search(problem, problem, gs.search_queueing_function, heuristic_function=heuristic)
             end_time = time.time()
-            execution_time = (end_time - start_time)* 1000
+            execution_time = (end_time - start_time) * 1000
             expanded_nodes = solution["expanded_nodes"]
             max_queue_size = solution["max_queue_size"]
             result = {
                 "Algorithm": algorithm,
+                "Size": size,
                 "Depth": solution["cost"],
                 "Execution Time(ms)": round(execution_time, 3),
                 "Expanded Nodes": expanded_nodes,
@@ -25,60 +27,64 @@ def test_algorithms(algorithms, initial_states):
             results.append(result)
 
     return pd.DataFrame(results)
+def call_algorithm(algorithm_choice, initial_state, size):
+    problem = pp.Problem(size=size, initial_state=initial_state)
+    if algorithm_choice == '1':
+        solution = gs.general_search(problem, gs.search_queueing_function, heuristic_function=None, show_info=True)
+        gs.print_solution(solution,problem, heuristic_function=None)
+
+    elif algorithm_choice == '2':
+        solution = gs.general_search(problem, gs.search_queueing_function,
+                                     heuristic_function=pp.Problem.misplaced_tile_heuristic, show_info=True)
+        gs.print_solution(solution,problem, heuristic_function=pp.Problem.misplaced_tile_heuristic)
+
+    elif algorithm_choice == '3':
+        solution = gs.general_search(problem, gs.search_queueing_function,
+                                     heuristic_function=pp.Problem.manhattan_distance_heuristic, show_info=True)
+        gs.print_solution(solution,problem, heuristic_function=pp.Problem.manhattan_distance_heuristic)
+
+    else:
+        print("Invalid algorithm choice. Stop")
 
 def main():
     while True:
         print("\n--- 8-Puzzle Solver ---")
-        print("1. Custom Puzzle Solver")
-        print("2. Random Puzzle Solver")
-        print("3. Run Tests")
+        print("1. Random Puzzle Solver")
+        print("2. Run Tests")
+        print("--- n-Puzzle Solver ---")
+        print("3. Custom Puzzle Solver")
         print("4. Quit")
         choice = input("Please select an option: ")
 
-        if choice == '1':
-            initial_state = input("Enter your initial state (e.g., 1,2,3,4,5,6,7,8,0 for 1 2 3 | 4 5 6 | 7 8 0): ")
+        if choice == '3':
+            size = int(input("Enter the size of the puzzle (e.g., 3 for an 8-puzzle, 4 for a 15-puzzle): "))
+            is_random = input("Would you like to generate a random puzzle? (y/n): ")
+            if is_random == 'y':
+                initial_state = None
+            else:
+                initial_state = input(
+                    f"Enter your initial state for a {size}x{size} puzzle (e.g., 1,2,3,4,5,6,7,8,0 for 1 2 3 | 4 5 6 | 7 8 0): ")
             # Convert string to 2D list
-            initial_state = [list(map(int, initial_state.split(',')))[i:i+3] for i in range(0, 9, 3)]
-            print("1. UCS")
-            print("2. A* Misplaced Tile")
-            print("3. A* Manhattan Distance")
-            algorithm_choice = input("Choose an algorithm: ")
-            problem = pp.Problem(initial_state)
-            if algorithm_choice == '1':
-                gs.general_search(problem, gs.search_queueing_function, heuristic_function=None, show_info=True)
-                break
-            elif algorithm_choice == '2':
-                gs.general_search(problem, gs.search_queueing_function, heuristic_function=problem.misplaced_tile_heuristic, show_info=True)
-                break
-            elif algorithm_choice == '3':
-                gs.general_search(problem, gs.search_queueing_function, heuristic_function=problem.manhattan_distance_heuristic, show_info=True)
-                break
-            else:
-                print("Invalid algorithm choice.")
-                break
+                initial_state = [list(map(int, initial_state.split(',')))[i:i + size] for i in range(0, size * size, size)]
+                if len([num for row in initial_state for num in row]) != size * size:
+                    raise ValueError("The provided initial state does not match your puzzle size.")
+                    break
 
-        elif choice == '2':
             print("1. UCS")
             print("2. A* Misplaced Tile")
             print("3. A* Manhattan Distance")
             algorithm_choice = input("Choose an algorithm: ")
-            problem = pp.Problem()
-            if algorithm_choice == '1':
-                solution = gs.general_search(problem, gs.search_queueing_function, heuristic_function=None, show_info=True)
-                gs.print_solution(solution, heuristic_function=None)
-                break
-            elif algorithm_choice == '2':
-                solution = gs.general_search(problem, gs.search_queueing_function, heuristic_function=problem.misplaced_tile_heuristic, show_info=True)
-                gs.print_solution(solution, heuristic_function=problem.misplaced_tile_heuristic)
-                break
-            elif algorithm_choice == '3':
-                solution = gs.general_search(problem, gs.search_queueing_function, heuristic_function=problem.manhattan_distance_heuristic, show_info=True)
-                gs.print_solution(solution, heuristic_function=problem.manhattan_distance_heuristic)
-                break
-            else:
-                print("Invalid algorithm choice.")
-                break
-        elif choice == '3':
+            call_algorithm(algorithm_choice, initial_state,size)
+            break
+
+        elif choice == '1':
+            print("1. UCS")
+            print("2. A* Misplaced Tile")
+            print("3. A* Manhattan Distance")
+            algorithm_choice = input("Choose an algorithm: ")
+            call_algorithm(algorithm_choice,initial_state=None,size=3)
+            break
+        elif choice == '2':
             algorithms = [
                 ("UCS", None),
                 ("A* Misplaced Tile", pp.Problem.misplaced_tile_heuristic),
@@ -126,23 +132,32 @@ def main():
                     [3, 5, 8]
                 ]
             ]
-            results_df = test_algorithms(algorithms, initial_states)
+            sizes = [3] * len(initial_states)
+            print("Running tests of 8-puzzle game. This may take a while...")
+            results_df = test_algorithms(algorithms, sizes=sizes, initial_states=initial_states)
             results_df.to_csv("algorithm_comparison.csv", index=False)
+            print("Generating plots...")
             plt.figure()
-            sns.lineplot(data=results_df, x="Depth", y="Execution Time(ms)", hue="Algorithm", marker="o")
+            ax = sns.lineplot(data=results_df, x="Depth", y="Execution Time(ms)", hue="Algorithm", marker="o")
+            ax.fill_between(results_df["Depth"], 0, results_df["Execution Time(ms)"], where=results_df["Depth"] >= 16, color='red', alpha=0.3)
+            plt.text(18, ax.get_ylim()[1]*0.05, "Hard Depth", color='red', fontsize=12)
             plt.title("Time Complexity Comparison")
             plt.savefig("time_complexity_comparison.png")
             plt.close()
 
             # Expanded nodes plot
             plt.figure()
-            sns.lineplot(data=results_df, x="Depth", y="Expanded Nodes", hue="Algorithm", marker="o")
+            ax = sns.lineplot(data=results_df, x="Depth", y="Expanded Nodes", hue="Algorithm", marker="o")
+            ax.fill_between(results_df["Depth"], 0, results_df["Expanded Nodes"], where=results_df["Depth"] >= 16, color='red', alpha=0.3)
+            plt.text(18, ax.get_ylim()[1]*0.1, "Hard Depth", color='red', fontsize=12)
             plt.title("Expanded Nodes Comparison")
             plt.savefig("expanded_nodes_comparison.png")
             plt.close()
             # Max Queue Size plot
             plt.figure()
-            sns.lineplot(data=results_df, x="Depth", y="Max Queue Size", hue="Algorithm", marker="o")
+            ax = sns.lineplot(data=results_df, x="Depth", y="Max Queue Size", hue="Algorithm", marker="o")
+            ax.fill_between(results_df["Depth"], 0, results_df["Max Queue Size"], where=results_df["Depth"] >= 16, color='red', alpha=0.3)
+            plt.text(18, ax.get_ylim()[1]*0.2, "Hard Depth", color='red', fontsize=12)
             plt.title("Max Queue Size Comparison")
             plt.savefig("max_queue_size_comparison.png")
             plt.close()
@@ -153,10 +168,8 @@ def main():
         elif choice == '4':
             print("Exiting...")
             break
-
         else:
             print("Invalid option. Please enter a number between 1 and 4.")
-
 
 
 

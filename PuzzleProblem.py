@@ -20,12 +20,10 @@ class MyTreeNode:
         return self.state < other.state
 
 class Problem:
-    def __init__(self, initial_state=None):
-        self.goal_state = [
-            [1,2, 3],
-            [4, 5, 6],
-            [7, 8, 0]
-        ]
+    def __init__(self, size = 3,initial_state=None):
+        self.size = size
+        self.goal_state = [[(i * size + j + 1) % (size * size) for j in range(size)] for i in range(size)]
+
         if initial_state:
             self.initial_state = initial_state
             print("Setting initial state:")
@@ -42,11 +40,11 @@ class Problem:
             self.print_state(self.initial_state)
 
     def generate_random_state(self):
-        state = [[None] * 3 for _ in range(3)]
-        nums = list(range(9))
+        state = [[None] * self.size for _ in range(self.size)]
+        nums = list(range(self.size*self.size))
         random.shuffle(nums)
-        for i in range(3):
-            for j in range(3):
+        for i in range(self.size):
+            for j in range(self.size):
                 state[i][j] = nums.pop()
         print("Generated random initial state:")
         self.print_state(state)
@@ -61,7 +59,7 @@ class Problem:
 
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             x, y = i + dx, j + dy
-            if 0 <= x < 3 and 0 <= y < 3:
+            if 0 <= x < self.size and 0 <= y < self.size:
                 # use copy to avoid shallow copy. Otherwise, the state will be changed
                 new_state = [row.copy() for row in node.state]
                 new_state[i][j], new_state[x][y] = new_state[x][y], new_state[i][j]
@@ -74,10 +72,11 @@ class Problem:
             for j, cell in enumerate(row):
                 if cell == 0:
                     return i, j
-
+    def get_size(self):
+        return self.size
     def print_state(self, state):
-            for i in range(3):
-                for j in range(3):
+            for i in range(self.size):
+                for j in range(self.size):
                     print(state[i][j], end=" ")
                 print()
 
