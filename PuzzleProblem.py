@@ -1,7 +1,4 @@
-
 import random
-
-
 class MyTreeNode:
     def __init__(self, state, parent=None):
         """
@@ -34,7 +31,15 @@ class Problem:
             print("Setting initial state:")
             self.print_state(initial_state)
         else:
-            self.initial_state = self.generate_random_state()
+            #if random state is not solvable, generate another one
+            print("Generating random initial state:")
+            temp = self.generate_random_state()
+            while not self.check_solvable(temp, self.goal_state):
+                print("Not solvable, generating another one")
+                temp = self.generate_random_state()
+            print("Solvable, setting initial state:")
+            self.initial_state = temp
+            self.print_state(self.initial_state)
 
     def generate_random_state(self):
         state = [[None] * 3 for _ in range(3)]
@@ -69,17 +74,26 @@ class Problem:
                 if cell == 0:
                     return i, j
 
-    def print_state(self, state, representation="grid"):
-        if representation == "list":
-            for row in state:
-                print(row)
-        elif representation == "grid":
+    def print_state(self, state):
             for i in range(3):
                 for j in range(3):
                     print(state[i][j], end=" ")
                 print()
-        else:
-            print("Invalid representation.")
+
+    def check_solvable(self,state, goal_state):
+        def inversion_count(puzzle_state):
+            flat_puzzle = [tile for row in puzzle_state for tile in row if tile != 0]
+            inversions = 0
+            for i in range(len(flat_puzzle)):
+                for j in range(i + 1, len(flat_puzzle)):
+                    if flat_puzzle[i] > flat_puzzle[j]:
+                        inversions += 1
+            return inversions
+
+        initial_inversions = inversion_count(state)
+        goal_inversions = inversion_count(goal_state)
+
+        return initial_inversions % 2 == goal_inversions % 2
 
     def misplaced_tile_heuristic(self, state):
         misplaced_tiles = sum(
