@@ -6,12 +6,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 def test_algorithms(algorithms, initial_states, sizes):
+    """
+    Tests different algorithms on a set of 8-puzzle problems
+    :param algorithms: list of algorithms to test
+    :param initial_states: list of initial states for the problems
+    :param sizes: list of sizes of the problems
+    :return: a dataframe containing the results of the tests
+    """
     results = []
     for algorithm, heuristic in algorithms:
         for size, initial_state in zip(sizes, initial_states):
             problem = pp.Problem(size, initial_state)
             start_time = time.time()
-            solution = gs.general_search(problem, problem, gs.search_queueing_function, heuristic_function=heuristic)
+            solution = gs.general_search(problem, gs.search_queueing_function, heuristic_function=heuristic)
             end_time = time.time()
             execution_time = (end_time - start_time) * 1000
             expanded_nodes = solution["expanded_nodes"]
@@ -28,6 +35,13 @@ def test_algorithms(algorithms, initial_states, sizes):
 
     return pd.DataFrame(results)
 def call_algorithm(algorithm_choice, initial_state, size):
+    """
+    Calls the chosen algorithm on the specified problem
+    :param algorithm_choice: the chosen algorithm
+    :param initial_state: the initial state of the problem
+    :param size: the size of the problem
+    :return: None
+    """
     problem = pp.Problem(size=size, initial_state=initial_state)
     if algorithm_choice == '1':
         solution = gs.general_search(problem, gs.search_queueing_function, heuristic_function=None, show_info=True)
@@ -57,7 +71,8 @@ def main():
         choice = input("Please select an option: ")
 
         if choice == '3':
-            size = int(input("Enter the size of the puzzle (e.g., 3 for an 8-puzzle, 4 for a 15-puzzle): "))
+            print("warning, this part will take a long time to run, please don't push so hard!")
+            size = int(input("Enter the size of the puzzle (e.g., 3 for an 8-puzzle, 4 for a 15-puzzle, 5 for a 24-puzzle etc.): "))
             is_random = input("Would you like to generate a random puzzle? (y/n): ")
             if is_random == 'y':
                 initial_state = None
@@ -90,6 +105,7 @@ def main():
                 ("A* Misplaced Tile", pp.Problem.misplaced_tile_heuristic),
                 ("A* Manhattan Distance", pp.Problem.manhattan_distance_heuristic)
             ]
+            # 8-puzzle initial states with different depths from the project description.
             initial_states = [
                 [
                     [1, 2, 3],
@@ -133,12 +149,13 @@ def main():
                 ]
             ]
             sizes = [3] * len(initial_states)
-            print("Running tests of 8-puzzle game. This may take a while...")
+            print("Running tests of 8-puzzle game...")
             results_df = test_algorithms(algorithms, sizes=sizes, initial_states=initial_states)
             results_df.to_csv("algorithm_comparison.csv", index=False)
             print("Generating plots...")
             plt.figure()
             ax = sns.lineplot(data=results_df, x="Depth", y="Execution Time(ms)", hue="Algorithm", marker="o")
+            #source from https://www.geeksforgeeks.org/matplotlib-pyplot-fill_between-in-python/
             ax.fill_between(results_df["Depth"], 0, results_df["Execution Time(ms)"], where=results_df["Depth"] >= 16, color='red', alpha=0.3)
             plt.text(18, ax.get_ylim()[1]*0.05, "Hard Depth", color='red', fontsize=12)
             plt.title("Time Complexity Comparison")
@@ -161,7 +178,6 @@ def main():
             plt.title("Max Queue Size Comparison")
             plt.savefig("max_queue_size_comparison.png")
             plt.close()
-
             print("Results saved to algorithm_comparison.csv, time_complexity_comparison.png, expanded_nodes_comparison.png and max_queue_size_comparison.png")
             break
 
@@ -171,9 +187,5 @@ def main():
         else:
             print("Invalid option. Please enter a number between 1 and 4.")
 
-
-
 if __name__ == "__main__":
     main()
-
-

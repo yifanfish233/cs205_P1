@@ -1,3 +1,4 @@
+#Part I use external library:
 import random
 class MyTreeNode:
     def __init__(self, state, parent=None):
@@ -40,6 +41,10 @@ class Problem:
             self.print_state(self.initial_state)
 
     def generate_random_state(self):
+        """
+        Generate a random state
+        :return:
+        """
         state = [[None] * self.size for _ in range(self.size)]
         nums = list(range(self.size*self.size))
         random.shuffle(nums)
@@ -54,6 +59,11 @@ class Problem:
         return state == self.goal_state
 
     def get_next_states(self, node):
+        """
+        Get next states
+        :param node:
+        :return:
+        """
         next_states = []
         i, j = self.find_zero(node.state)
 
@@ -81,7 +91,13 @@ class Problem:
                 print()
 
     def check_solvable(self,state, goal_state):
-        def inversion_count(puzzle_state):
+        """
+        Check if the puzzle is solvable, source from https://www.geeksforgeeks.org/check-instance-8-puzzle-solvable/
+        :param state:
+        :param goal_state:
+        :return:
+        """
+        def inversion_counter(puzzle_state):
             flat_puzzle = [tile for row in puzzle_state for tile in row if tile != 0]
             inversions = 0
             for i in range(len(flat_puzzle)):
@@ -90,8 +106,8 @@ class Problem:
                         inversions += 1
             return inversions
 
-        initial_inversions = inversion_count(state)
-        goal_inversions = inversion_count(goal_state)
+        initial_inversions = inversion_counter(state)
+        goal_inversions = inversion_counter(goal_state)
 
         return initial_inversions % 2 == goal_inversions % 2
 
@@ -103,11 +119,12 @@ class Problem:
         return misplaced_tiles
 
     def manhattan_distance_heuristic(self, state):
+        #Manhattan distance is the sum of the absolute values of the horizontal and vertical distance for each tile.
         manhattan_distance = 0
         for i, row in enumerate(state):
             for j, cell in enumerate(row):
                 if cell != 0:
-                    correct_i, correct_j = divmod(cell - 1, 3)
+                    correct_i = (cell - 1) // self.size
+                    correct_j = (cell - 1) % self.size
                     manhattan_distance += abs(i - correct_i) + abs(j - correct_j)
         return manhattan_distance
-
