@@ -70,7 +70,7 @@ class Problem:
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             x, y = i + dx, j + dy
             if 0 <= x < self.size and 0 <= y < self.size:
-                # use copy to avoid shallow copy. Otherwise, the state will be changed
+                #it's a shallow copy, we no need to use deepcopy.
                 new_state = [row.copy() for row in node.state]
                 new_state[i][j], new_state[x][y] = new_state[x][y], new_state[i][j]
                 new_node = MyTreeNode(new_state, node)
@@ -92,7 +92,8 @@ class Problem:
 
     def check_solvable(self,state, goal_state):
         """
-        Check if the puzzle is solvable, source from https://www.geeksforgeeks.org/check-instance-8-puzzle-solvable/
+        Check if the puzzle is solvable,
+        source from https://www.geeksforgeeks.org/check-instance-8-puzzle-solvable/
         :param state:
         :param goal_state:
         :return:

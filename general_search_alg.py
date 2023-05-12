@@ -1,4 +1,5 @@
 import PuzzleProblem as pp
+#part I use external library:
 import heapq
 def general_search(problem, queueing_function, heuristic_function=None, show_info=False):
     """
